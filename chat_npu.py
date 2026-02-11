@@ -16,7 +16,7 @@ print("=" * 50)
 print("  Mistral-7B NPU Chat (Unlocked Edition)")
 print("  Intel AI Boost Accelerated")
 print("=" * 50)
-print("\n[*] Loading model on NPU... (DeepSeek/Mistral compatible)\n")
+print("\nLoading model on NPU...\n")
 
 model_path = str(SCRIPT_DIR / "mistral_npu_cw")
 
