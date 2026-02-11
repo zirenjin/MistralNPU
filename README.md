@@ -1,4 +1,4 @@
-# Mistral NPU Chat
+# NPU Chat with Mistral
 
 A conversational AI chatbot powered by **Intel NPU** (Neural Processing Unit) using OpenVINO GenAI. Run large language models locally with hardware acceleration on Intel Core Ultra processors.
 
@@ -38,7 +38,7 @@ MistralNPU/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/MistralNPU.git
+git clone https://github.com/zirenjin/MistralNPU.git
 cd MistralNPU
 ```
 
