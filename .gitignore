@@ -53,6 +53,9 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# Benchmark results
+benchmarks/
+
 # Testing
 .pytest_cache/
 .coverage

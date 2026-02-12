@@ -8,3 +8,6 @@ huggingface-hub>=0.20.0
 
 # Environment configuration
 python-dotenv>=1.0.0
+
+# Benchmark (optional)
+psutil>=5.9.0
