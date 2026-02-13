@@ -176,11 +176,15 @@ def run_single_benchmark(model_path, device, prompt, max_new_tokens, counter,
     """Run a single inference and return metrics dict."""
     mem_before = get_memory_mb()
 
-    # MAX_PROMPT_LEN is only supported by the NPU plugin
+    # Use compilation cache for faster loading; MAX_PROMPT_LEN is NPU-only
+    cache_dir = str(PROJECT_ROOT / "cache")
+    os.makedirs(cache_dir, exist_ok=True)
+
     if device == "NPU":
-        pipe = ov_genai.LLMPipeline(str(model_path), device, MAX_PROMPT_LEN=MAX_PROMPT_LEN)
+        pipe = ov_genai.LLMPipeline(str(model_path), device,
+                                    MAX_PROMPT_LEN=MAX_PROMPT_LEN, CACHE_DIR=cache_dir)
     else:
-        pipe = ov_genai.LLMPipeline(str(model_path), device)
+        pipe = ov_genai.LLMPipeline(str(model_path), device, CACHE_DIR=cache_dir)
 
     mem_after_load = get_memory_mb()
 

@@ -6,6 +6,7 @@ A conversational AI powered by OpenVINO on Intel NPU
 import openvino_genai as ov_genai
 import os
 import sys
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -15,6 +16,7 @@ load_dotenv()
 # Get project root directory
 PROJECT_ROOT = Path(__file__).parent.parent
 MODEL_DIR = PROJECT_ROOT / "models"
+CACHE_DIR = PROJECT_ROOT / "cache"
 
 # Configuration from environment
 MODEL_NAME = os.getenv("MODEL_NAME", "mistral_npu_cw")
@@ -24,7 +26,7 @@ MAX_NEW_TOKENS = int(os.getenv("MAX_NEW_TOKENS", "2048"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 SYSTEM_PROMPT = os.getenv(
     "SYSTEM_PROMPT",
-    "You are a helpful assistant. Always answer in the same language as the user's question. Do not translate your response unless explicitly asked."
+    "You are a helpful and accurate assistant. Avoid contradictions and obvious errors. If uncertain, say so. Respond in English unless explicitly asked otherwise. Be concise."
 )
 
 
@@ -72,15 +74,30 @@ def main():
         sys.exit(1)
 
     try:
-        # Initialize pipeline
-        pipe = ov_genai.LLMPipeline(model_path, DEVICE, MAX_PROMPT_LEN=MAX_PROMPT_LEN)
+        # Initialize pipeline with compilation cache for faster subsequent loads
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        t0 = time.perf_counter()
+
+        if DEVICE == "NPU":
+            pipe = ov_genai.LLMPipeline(
+                model_path, DEVICE,
+                MAX_PROMPT_LEN=MAX_PROMPT_LEN,
+                CACHE_DIR=str(CACHE_DIR),
+            )
+        else:
+            pipe = ov_genai.LLMPipeline(
+                model_path, DEVICE,
+                CACHE_DIR=str(CACHE_DIR),
+            )
+
+        load_time = time.perf_counter() - t0
         pipe.start_chat(SYSTEM_PROMPT)
     except Exception as e:
         print(f"[!] Failed to load model: {e}")
         print(f"Hint: Try setting DEVICE=GPU or DEVICE=CPU in .env file.")
         sys.exit(1)
 
-    print(f"[OK] {DEVICE} ready!\n")
+    print(f"[OK] {DEVICE} ready! (loaded in {load_time:.1f}s)\n")
     print("Commands: /exit to quit, /clear to clear screen, /reset to forget history\n")
     print("-" * 50)
 
@@ -121,8 +138,9 @@ def main():
         print("\nAI > ", end="", flush=True)
 
         try:
+            prompt = user_input + " (Reply in English.)"
             pipe.generate(
-                user_input,
+                prompt,
                 config,
                 streamer=lambda x: print(x, end="", flush=True)
             )

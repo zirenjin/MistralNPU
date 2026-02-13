@@ -56,6 +56,9 @@ Thumbs.db
 # Benchmark results
 benchmarks/
 
+# OpenVINO compilation cache
+cache/
+
 # Testing
 .pytest_cache/
 .coverage
